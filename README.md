@@ -1,7 +1,9 @@
 # Context Confidence Rating (CCR™)
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![PyPI](https://img.shields.io/pypi/v/context-confidence-rating)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
+![Downloads](https://img.shields.io/pypi/dm/context-confidence-rating)
 ![Status](https://img.shields.io/badge/status-beta-orange)
 
 **A lightweight library for calculating context-aware confidence scores for security findings.**
