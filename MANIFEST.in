@@ -1,0 +1,15 @@
+include README.md
+include LICENSE
+include CONTRIBUTING.md
+include pyproject.toml
+include setup.py
+
+recursive-include ccr *.py
+recursive-include tests *.py
+recursive-include examples *.py
+
+exclude .gitignore
+exclude .github
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.orig
