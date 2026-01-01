@@ -188,7 +188,7 @@ pip install context-confidence-rating
 ### From Source
 
 ```bash
-git clone https://github.com/secuarden/context-confidence-rating.git
+git clone https://github.com/secuardenai/context-confidence-rating.git
 cd context-confidence-rating
 pip install -e .
 ```
@@ -196,7 +196,7 @@ pip install -e .
 ### Development Installation
 
 ```bash
-git clone https://github.com/secuarden/context-confidence-rating.git
+git clone https://github.com/secuardenai/context-confidence-rating.git
 cd context-confidence-rating
 pip install -e ".[dev]"
 pytest
@@ -260,7 +260,7 @@ We welcome contributions! This is an open-source project maintained by Secuarden
 
 ```bash
 # Setup development environment
-git clone https://github.com/secuarden/context-confidence-rating.git
+git clone https://github.com/secuardenai/context-confidence-rating.git
 cd context-confidence-rating
 pip install -e ".[dev]"
 

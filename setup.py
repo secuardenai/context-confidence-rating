@@ -5,13 +5,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="context-confidence-rating",
-    version="0.1.0",
+    version="0.1.2",
     author="Secuarden Team",
     author_email="hello@secuarden.com",
     description="Calculate context-aware confidence scores for security findings",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/secuarden/context-confidence-rating",
+    url="https://github.com/secuardenai/context-confidence-rating",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -44,9 +44,9 @@ setup(
         ],
     },
     keywords="security, vulnerability, context, confidence, sast, analysis",
-    project_urls={
-        "Bug Reports": "https://github.com/secuarden/context-confidence-rating/issues",
-        "Source": "https://github.com/secuarden/context-confidence-rating",
-        "Documentation": "https://github.com/secuarden/context-confidence-rating#readme",
-    },
+   project_urls={
+    "Bug Reports": "https://github.com/SecuardenAI/context-confidence-rating/issues",
+    "Source": "https://github.com/SecuardenAI/context-confidence-rating",
+    "Documentation": "https://github.com/SecuardenAI/context-confidence-rating#readme",
+},
 )
