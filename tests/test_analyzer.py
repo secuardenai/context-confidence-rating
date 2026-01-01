@@ -121,7 +121,7 @@ class TestContextAnalyzer:
         result = analyzer.calculate_repo_baseline_ccr()
 
         # Rich repo should have high CCR
-        assert result.confidence in ['medium', 'high']
+        assert result.confidence in ["medium", "high"]
         assert result.score > 30  # Should be well above minimal
 
     def test_security_controls_detection(self, rich_repo):
