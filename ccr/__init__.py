@@ -10,5 +10,5 @@ Licensed under MIT License
 
 from .analyzer import ContextAnalyzer, CCRResult, ConfidenceLevel
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 __all__ = ["ContextAnalyzer", "CCRResult", "ConfidenceLevel"]

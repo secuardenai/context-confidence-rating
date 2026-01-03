@@ -6,13 +6,22 @@
 ![Downloads](https://img.shields.io/pypi/dm/context-confidence-rating)
 ![Status](https://img.shields.io/badge/status-beta-orange)
 
-**A lightweight library for calculating context-aware confidence scores for security findings.**
+**Why CVSS fails modern apps — and how CCR fixes it.**
 
 CCR helps you understand *how much* a security scanner actually understands your codebase's risk context—not just whether vulnerabilities exist, but whether they're actually exploitable given your application's architecture, dependencies, and security controls.
 
+> Finding: SQL Injection
+> CVSS: 9.8 (Critical)
+> CCR: 0.42 (Low confidence)
+> 
+>> Why?
+>>  - Internal admin-only endpoint
+>>  - No external exposure
+>>  - No user-controlled input path
+
+
 🎯 **Built by [Secuarden](https://secuarden.com)** - Product Security Intelligence Platform
 
----
 
 ## 🚀 Quick Start
 
@@ -35,6 +44,8 @@ ccr analyze /path/to/repo --file "api/auth.py" --vuln "SQL Injection" --severity
 - ✅ More accurate vulnerability prioritization  
 - ✅ Fewer false positives to investigate
 - ✅ More reliable findings for compliance audits
+
+### ℹ️ CCR does not replace CVSS. It explains when CVSS overreacts.
 
 ### The Problem It Solves
 
@@ -188,7 +199,7 @@ pip install context-confidence-rating
 ### From Source
 
 ```bash
-git clone https://github.com/secuarden/context-confidence-rating.git
+git clone https://github.com/secuardenai/context-confidence-rating.git
 cd context-confidence-rating
 pip install -e .
 ```
@@ -196,7 +207,7 @@ pip install -e .
 ### Development Installation
 
 ```bash
-git clone https://github.com/secuarden/context-confidence-rating.git
+git clone https://github.com/secuardenai/context-confidence-rating.git
 cd context-confidence-rating
 pip install -e ".[dev]"
 pytest
@@ -260,7 +271,7 @@ We welcome contributions! This is an open-source project maintained by Secuarden
 
 ```bash
 # Setup development environment
-git clone https://github.com/secuarden/context-confidence-rating.git
+git clone https://github.com/secuardenai/context-confidence-rating.git
 cd context-confidence-rating
 pip install -e ".[dev]"
 
