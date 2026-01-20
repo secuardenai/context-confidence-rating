@@ -6,7 +6,7 @@ Helps prioritize vulnerabilities based on actual exploitability in your codebase
 
 Also provides rich codebase context generation for LLM security analysis.
 
-Copyright (c) 2025 Secuarden 
+Copyright (c) 2025 Secuarden
 Licensed under MIT License
 """
 

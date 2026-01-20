@@ -259,9 +259,13 @@ def print_human_readable(result, analyzer, verbose=False):
 
     if not result.factors.get("has_security_controls", {}).get("present"):
         recommendations.append("Add security controls (SECURITY.md, CI/CD workflows)")
-    elif result.factors.get("has_security_controls", {}).get("details", {}).get("strength", 0) < 0.6:
+    elif (
+        result.factors.get("has_security_controls", {}).get("details", {}).get("strength", 0) < 0.6
+    ):
         # Check what specific controls are missing
-        controls = result.factors.get("has_security_controls", {}).get("details", {}).get("controls", [])
+        controls = (
+            result.factors.get("has_security_controls", {}).get("details", {}).get("controls", [])
+        )
         if "code_ownership" not in controls:
             recommendations.append("Add CODEOWNERS file for code review requirements")
         if "pre_commit_hooks" not in controls:
@@ -271,14 +275,18 @@ def print_human_readable(result, analyzer, verbose=False):
         recommendations.append("Add test coverage for better code flow analysis")
 
     if not result.factors.get("has_framework_detection", {}).get("present"):
-        recommendations.append("Framework detection failed - ensure dependencies are properly declared")
+        recommendations.append(
+            "Framework detection failed - ensure dependencies are properly declared"
+        )
 
     # Add general recommendations based on score
     if result.score >= 70:
         recommendations.append("Excellent context signals detected!")
         recommendations.append("Consider integrating CCR into your CI/CD pipeline")
     elif not recommendations:
-        recommendations.append("Consider adding security scanning configurations (.semgrep.yml, .snyk)")
+        recommendations.append(
+            "Consider adding security scanning configurations (.semgrep.yml, .snyk)"
+        )
         recommendations.append("Consider integrating CCR into your CI/CD pipeline")
 
     for rec in recommendations:

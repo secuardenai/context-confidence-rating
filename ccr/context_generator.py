@@ -4,7 +4,7 @@ CCR Context Generator - Generate rich codebase context for LLM security analysis
 This module analyzes repositories and generates structured context that can be
 passed to LLMs alongside security findings for more accurate analysis.
 
-Copyright (c) 2025 Secuarden 
+Copyright (c) 2025 Secuarden
 Licensed under MIT License
 """
 
@@ -38,14 +38,32 @@ class ContextGenerator:
     # Security-related packages by ecosystem
     SECURITY_PACKAGES = {
         "python": {
-            "auth": ["django-allauth", "flask-login", "passlib", "python-jose", "pyjwt", "authlib", "python-oauth2"],
+            "auth": [
+                "django-allauth",
+                "flask-login",
+                "passlib",
+                "python-jose",
+                "pyjwt",
+                "authlib",
+                "python-oauth2",
+            ],
             "crypto": ["cryptography", "bcrypt", "argon2-cffi", "pynacl", "hashlib"],
             "validation": ["pydantic", "marshmallow", "cerberus", "voluptuous", "wtforms"],
             "security": ["bandit", "safety", "pip-audit", "semgrep"],
             "web_security": ["django-cors-headers", "flask-cors", "secure", "flask-talisman"],
         },
         "javascript": {
-            "auth": ["passport", "jsonwebtoken", "jose", "next-auth", "@auth/core", "lucia", "better-auth", "clerk", "auth0"],
+            "auth": [
+                "passport",
+                "jsonwebtoken",
+                "jose",
+                "next-auth",
+                "@auth/core",
+                "lucia",
+                "better-auth",
+                "clerk",
+                "auth0",
+            ],
             "crypto": ["bcrypt", "bcryptjs", "argon2", "crypto-js", "node-forge"],
             "validation": ["zod", "yup", "joi", "ajv", "class-validator", "superstruct", "valibot"],
             "security": ["helmet", "hpp", "express-rate-limit", "rate-limiter-flexible"],
@@ -226,7 +244,12 @@ class ContextGenerator:
             arch["api_style"] = "REST"
 
         # Detect monorepo
-        if self._directory_exists("packages") or self._directory_exists("apps") or self._file_exists("turbo.json") or self._file_exists("pnpm-workspace.yaml"):
+        if (
+            self._directory_exists("packages")
+            or self._directory_exists("apps")
+            or self._file_exists("turbo.json")
+            or self._file_exists("pnpm-workspace.yaml")
+        ):
             arch["monorepo"] = True
 
         return arch
@@ -242,46 +265,65 @@ class ContextGenerator:
             if dir_path.is_dir():
                 for route_file in dir_path.rglob("*.ts"):
                     rel_path = route_file.relative_to(self.repo_path)
-                    entry_points.append({
-                        "type": "api_route",
-                        "path": str(rel_path),
-                        "methods": self._detect_http_methods(route_file),
-                    })
+                    entry_points.append(
+                        {
+                            "type": "api_route",
+                            "path": str(rel_path),
+                            "methods": self._detect_http_methods(route_file),
+                        }
+                    )
                 for route_file in dir_path.rglob("*.js"):
                     rel_path = route_file.relative_to(self.repo_path)
-                    entry_points.append({
-                        "type": "api_route",
-                        "path": str(rel_path),
-                        "methods": self._detect_http_methods(route_file),
-                    })
+                    entry_points.append(
+                        {
+                            "type": "api_route",
+                            "path": str(rel_path),
+                            "methods": self._detect_http_methods(route_file),
+                        }
+                    )
 
         # Express/Fastify route handlers
         for pattern in ["*.routes.ts", "*.routes.js", "*.router.ts", "*.router.js"]:
             for route_file in self.repo_path.rglob(pattern):
                 rel_path = route_file.relative_to(self.repo_path)
-                entry_points.append({
-                    "type": "route_handler",
-                    "path": str(rel_path),
-                    "methods": self._detect_http_methods(route_file),
-                })
+                entry_points.append(
+                    {
+                        "type": "route_handler",
+                        "path": str(rel_path),
+                        "methods": self._detect_http_methods(route_file),
+                    }
+                )
 
         # Python endpoints
         for pattern in ["views.py", "routes.py", "api.py", "endpoints.py"]:
             for py_file in self.repo_path.rglob(pattern):
                 rel_path = py_file.relative_to(self.repo_path)
-                entry_points.append({
-                    "type": "python_endpoint",
-                    "path": str(rel_path),
-                })
+                entry_points.append(
+                    {
+                        "type": "python_endpoint",
+                        "path": str(rel_path),
+                    }
+                )
 
         # Main entry files
-        main_files = ["index.ts", "index.js", "main.ts", "main.js", "app.ts", "app.js", "server.ts", "server.js"]
+        main_files = [
+            "index.ts",
+            "index.js",
+            "main.ts",
+            "main.js",
+            "app.ts",
+            "app.js",
+            "server.ts",
+            "server.js",
+        ]
         for main in main_files:
             if self._file_exists(main) or self._file_exists(f"src/{main}"):
-                entry_points.append({
-                    "type": "main_entry",
-                    "path": main if self._file_exists(main) else f"src/{main}",
-                })
+                entry_points.append(
+                    {
+                        "type": "main_entry",
+                        "path": main if self._file_exists(main) else f"src/{main}",
+                    }
+                )
 
         return entry_points[:20]  # Limit to avoid overwhelming context
 
@@ -320,19 +362,29 @@ class ContextGenerator:
                             posture["auth_library"] = package
 
         # Check specific security controls
-        posture["rate_limiting"] = any(p in deps for p in ["express-rate-limit", "rate-limiter-flexible", "@upstash/ratelimit"])
-        posture["cors_configured"] = "cors" in deps or self._search_in_files(["*.ts", "*.js"], r"cors\(")
+        posture["rate_limiting"] = any(
+            p in deps for p in ["express-rate-limit", "rate-limiter-flexible", "@upstash/ratelimit"]
+        )
+        posture["cors_configured"] = "cors" in deps or self._search_in_files(
+            ["*.ts", "*.js"], r"cors\("
+        )
         posture["helmet_enabled"] = "helmet" in deps
-        posture["csrf_protection"] = "csurf" in deps or self._search_in_files(["*.ts", "*.js"], r"csrf")
+        posture["csrf_protection"] = "csurf" in deps or self._search_in_files(
+            ["*.ts", "*.js"], r"csrf"
+        )
 
         # Check for security headers in Next.js config
         if self._file_exists("next.config.js") or self._file_exists("next.config.mjs"):
-            config_content = self._read_file("next.config.js") or self._read_file("next.config.mjs") or ""
+            config_content = (
+                self._read_file("next.config.js") or self._read_file("next.config.mjs") or ""
+            )
             if "headers" in config_content or "securityHeaders" in config_content:
                 posture["security_headers"] = True
 
         # Check for input sanitization
-        posture["input_sanitization"] = any(p in deps for p in ["dompurify", "sanitize-html", "xss", "validator"])
+        posture["input_sanitization"] = any(
+            p in deps for p in ["dompurify", "sanitize-html", "xss", "validator"]
+        )
 
         # Check CI security
         workflow_dir = self.repo_path / ".github" / "workflows"
@@ -349,8 +401,12 @@ class ContextGenerator:
                     posture["ci_security_checks"].append("Dependency Updates")
 
         # Security policy and codeowners
-        posture["security_policy"] = self._file_exists("SECURITY.md") or self._file_exists(".github/SECURITY.md")
-        posture["codeowners"] = self._file_exists("CODEOWNERS") or self._file_exists(".github/CODEOWNERS")
+        posture["security_policy"] = self._file_exists("SECURITY.md") or self._file_exists(
+            ".github/SECURITY.md"
+        )
+        posture["codeowners"] = self._file_exists("CODEOWNERS") or self._file_exists(
+            ".github/CODEOWNERS"
+        )
 
         return posture
 
@@ -386,7 +442,7 @@ class ContextGenerator:
         # Check for raw SQL (potential injection risk)
         raw_sql_patterns = [
             r'\.query\s*\(\s*[`"\'].*\$\{',  # Template literal in query
-            r'\.raw\s*\(',  # Raw query methods
+            r"\.raw\s*\(",  # Raw query methods
             r'execute\s*\(\s*f["\']',  # Python f-string in execute
             r'cursor\.execute\s*\(\s*["\'].*%s',  # Python string formatting
         ]
@@ -463,7 +519,21 @@ class ContextGenerator:
 
             # Find security-related deps
             all_deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
-            security_keywords = ["auth", "security", "crypto", "jwt", "oauth", "session", "helmet", "cors", "csrf", "sanitize", "validate", "zod", "yup"]
+            security_keywords = [
+                "auth",
+                "security",
+                "crypto",
+                "jwt",
+                "oauth",
+                "session",
+                "helmet",
+                "cors",
+                "csrf",
+                "sanitize",
+                "validate",
+                "zod",
+                "yup",
+            ]
             for dep in all_deps:
                 if any(kw in dep.lower() for kw in security_keywords):
                     deps_info["security_related"].append(dep)
@@ -495,34 +565,64 @@ class ContextGenerator:
             import_patterns = [
                 r'import\s+.*\s+from\s+["\']([^"\']+)["\']',
                 r'require\s*\(["\']([^"\']+)["\']\)',
-                r'from\s+(\S+)\s+import',
+                r"from\s+(\S+)\s+import",
             ]
             for pattern in import_patterns:
                 context["imports"].extend(re.findall(pattern, content))
 
             # Detect functions
             func_patterns = [
-                r'(?:export\s+)?(?:async\s+)?function\s+(\w+)',
-                r'(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s*)?\(',
-                r'def\s+(\w+)\s*\(',
+                r"(?:export\s+)?(?:async\s+)?function\s+(\w+)",
+                r"(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s*)?\(",
+                r"def\s+(\w+)\s*\(",
             ]
             for pattern in func_patterns:
                 context["functions"].extend(re.findall(pattern, content))
 
             # Check for user input handling
-            input_patterns = [r'req\.body', r'req\.params', r'req\.query', r'request\.json', r'request\.form', r'request\.args']
+            input_patterns = [
+                r"req\.body",
+                r"req\.params",
+                r"req\.query",
+                r"request\.json",
+                r"request\.form",
+                r"request\.args",
+            ]
             context["has_user_input"] = any(re.search(p, content) for p in input_patterns)
 
             # Check for database operations
-            db_patterns = [r'\.find', r'\.create', r'\.update', r'\.delete', r'\.query', r'\.execute', r'prisma\.', r'db\.']
+            db_patterns = [
+                r"\.find",
+                r"\.create",
+                r"\.update",
+                r"\.delete",
+                r"\.query",
+                r"\.execute",
+                r"prisma\.",
+                r"db\.",
+            ]
             context["has_database_ops"] = any(re.search(p, content) for p in db_patterns)
 
             # Check for auth checks
-            auth_patterns = [r'isAuthenticated', r'requireAuth', r'getSession', r'useSession', r'@login_required', r'auth\.']
+            auth_patterns = [
+                r"isAuthenticated",
+                r"requireAuth",
+                r"getSession",
+                r"useSession",
+                r"@login_required",
+                r"auth\.",
+            ]
             context["has_auth_checks"] = any(re.search(p, content) for p in auth_patterns)
 
             # Check for validation
-            validation_patterns = [r'\.parse\(', r'\.safeParse\(', r'validate\(', r'@IsString', r'@IsEmail', r'BaseModel']
+            validation_patterns = [
+                r"\.parse\(",
+                r"\.safeParse\(",
+                r"validate\(",
+                r"@IsString",
+                r"@IsEmail",
+                r"BaseModel",
+            ]
             context["has_validation"] = any(re.search(p, content) for p in validation_patterns)
 
         except Exception as e:
@@ -629,7 +729,9 @@ class ContextGenerator:
         lines.append("## Dependencies")
         lines.append(f"- **Package Manager:** {deps['package_manager'] or 'Unknown'}")
         lines.append(f"- **Lockfile:** {'Present' if deps['lockfile_present'] else 'Missing'}")
-        lines.append(f"- **Total:** {deps['total_dependencies']} production, {deps['dev_dependencies']} dev")
+        lines.append(
+            f"- **Total:** {deps['total_dependencies']} production, {deps['dev_dependencies']} dev"
+        )
         if deps["security_related"]:
             lines.append(f"- **Security-related:** {', '.join(deps['security_related'][:5])}")
         lines.append("")
@@ -681,16 +783,26 @@ class ContextGenerator:
         # Security Posture
         posture = context.security_posture
         lines.append("  <security_posture>")
-        lines.append(f"    <cors_configured>{str(posture['cors_configured']).lower()}</cors_configured>")
+        lines.append(
+            f"    <cors_configured>{str(posture['cors_configured']).lower()}</cors_configured>"
+        )
         lines.append(f"    <rate_limiting>{str(posture['rate_limiting']).lower()}</rate_limiting>")
-        lines.append(f"    <helmet_enabled>{str(posture['helmet_enabled']).lower()}</helmet_enabled>")
-        lines.append(f"    <csrf_protection>{str(posture['csrf_protection']).lower()}</csrf_protection>")
+        lines.append(
+            f"    <helmet_enabled>{str(posture['helmet_enabled']).lower()}</helmet_enabled>"
+        )
+        lines.append(
+            f"    <csrf_protection>{str(posture['csrf_protection']).lower()}</csrf_protection>"
+        )
         if posture["validation_library"]:
-            lines.append(f"    <validation_library>{posture['validation_library']}</validation_library>")
+            lines.append(
+                f"    <validation_library>{posture['validation_library']}</validation_library>"
+            )
         if posture["auth_library"]:
             lines.append(f"    <auth_library>{posture['auth_library']}</auth_library>")
         if posture["ci_security_checks"]:
-            lines.append(f"    <ci_security_checks>{', '.join(posture['ci_security_checks'])}</ci_security_checks>")
+            lines.append(
+                f"    <ci_security_checks>{', '.join(posture['ci_security_checks'])}</ci_security_checks>"
+            )
         lines.append("  </security_posture>")
 
         # Code Patterns
@@ -698,22 +810,38 @@ class ContextGenerator:
         lines.append("  <code_patterns>")
         if patterns["orm_usage"]:
             lines.append(f"    <orm>{patterns['orm_usage']}</orm>")
-        lines.append(f"    <raw_sql_detected>{str(patterns['raw_sql_detected']).lower()}</raw_sql_detected>")
-        lines.append(f"    <parameterized_queries>{str(patterns['parameterized_queries']).lower()}</parameterized_queries>")
+        lines.append(
+            f"    <raw_sql_detected>{str(patterns['raw_sql_detected']).lower()}</raw_sql_detected>"
+        )
+        lines.append(
+            f"    <parameterized_queries>{str(patterns['parameterized_queries']).lower()}</parameterized_queries>"
+        )
         if patterns["input_validation_pattern"]:
-            lines.append(f"    <validation_pattern>{patterns['input_validation_pattern']}</validation_pattern>")
+            lines.append(
+                f"    <validation_pattern>{patterns['input_validation_pattern']}</validation_pattern>"
+            )
         if patterns["secrets_management"]:
-            lines.append(f"    <secrets_management>{patterns['secrets_management']}</secrets_management>")
+            lines.append(
+                f"    <secrets_management>{patterns['secrets_management']}</secrets_management>"
+            )
         lines.append("  </code_patterns>")
 
         # File context if present
         if context.file_context and "error" not in context.file_context:
             fc = context.file_context
             lines.append(f"  <file_context file=\"{fc['file']}\" type=\"{fc['type']}\">")
-            lines.append(f"    <has_user_input>{str(fc['has_user_input']).lower()}</has_user_input>")
-            lines.append(f"    <has_database_ops>{str(fc['has_database_ops']).lower()}</has_database_ops>")
-            lines.append(f"    <has_auth_checks>{str(fc['has_auth_checks']).lower()}</has_auth_checks>")
-            lines.append(f"    <has_validation>{str(fc['has_validation']).lower()}</has_validation>")
+            lines.append(
+                f"    <has_user_input>{str(fc['has_user_input']).lower()}</has_user_input>"
+            )
+            lines.append(
+                f"    <has_database_ops>{str(fc['has_database_ops']).lower()}</has_database_ops>"
+            )
+            lines.append(
+                f"    <has_auth_checks>{str(fc['has_auth_checks']).lower()}</has_auth_checks>"
+            )
+            lines.append(
+                f"    <has_validation>{str(fc['has_validation']).lower()}</has_validation>"
+            )
             lines.append("  </file_context>")
 
         lines.append("</repo_context>")
@@ -752,7 +880,7 @@ class ContextGenerator:
                     line = line.strip()
                     if line and not line.startswith("#"):
                         # Extract package name (before ==, >=, etc.)
-                        pkg = re.split(r'[=<>!\[]', line)[0].strip().lower()
+                        pkg = re.split(r"[=<>!\[]", line)[0].strip().lower()
                         if pkg:
                             requirements.add(pkg)
             except:
@@ -835,11 +963,11 @@ class ContextGenerator:
         try:
             content = file_path.read_text(encoding="utf-8")
             method_patterns = {
-                "GET": [r'\.get\(', r'GET', r'@get', r'export.*GET'],
-                "POST": [r'\.post\(', r'POST', r'@post', r'export.*POST'],
-                "PUT": [r'\.put\(', r'PUT', r'@put', r'export.*PUT'],
-                "PATCH": [r'\.patch\(', r'PATCH', r'@patch', r'export.*PATCH'],
-                "DELETE": [r'\.delete\(', r'DELETE', r'@delete', r'export.*DELETE'],
+                "GET": [r"\.get\(", r"GET", r"@get", r"export.*GET"],
+                "POST": [r"\.post\(", r"POST", r"@post", r"export.*POST"],
+                "PUT": [r"\.put\(", r"PUT", r"@put", r"export.*PUT"],
+                "PATCH": [r"\.patch\(", r"PATCH", r"@patch", r"export.*PATCH"],
+                "DELETE": [r"\.delete\(", r"DELETE", r"@delete", r"export.*DELETE"],
             }
             for method, patterns in method_patterns.items():
                 if any(re.search(p, content, re.IGNORECASE) for p in patterns):

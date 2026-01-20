@@ -2,7 +2,7 @@
 Context Confidence Rating (CCR™) Analyzer
 A lightweight library for calculating context-aware security confidence scores.
 
-Copyright (c) 2025 Secuarden 
+Copyright (c) 2025 Secuarden
 Licensed under MIT License
 """
 
@@ -182,15 +182,23 @@ class ContextAnalyzer:
         # Node.js/JavaScript frameworks
         if self._file_contains_pattern(["package.json"], '"express"'):
             frameworks.append("Express")
-        if self._file_contains_pattern(["package.json"], '"next"') or self._file_exists("next.config.js") or self._file_exists("next.config.mjs"):
+        if (
+            self._file_contains_pattern(["package.json"], '"next"')
+            or self._file_exists("next.config.js")
+            or self._file_exists("next.config.mjs")
+        ):
             frameworks.append("Next.js")
         if self._file_contains_pattern(["package.json"], '"react"'):
             frameworks.append("React")
         if self._file_contains_pattern(["package.json"], '"vue"'):
             frameworks.append("Vue")
-        if self._file_contains_pattern(["package.json"], '"svelte"') or self._file_exists("svelte.config.js"):
+        if self._file_contains_pattern(["package.json"], '"svelte"') or self._file_exists(
+            "svelte.config.js"
+        ):
             frameworks.append("Svelte")
-        if self._file_contains_pattern(["package.json"], '"nuxt"') or self._file_exists("nuxt.config.ts"):
+        if self._file_contains_pattern(["package.json"], '"nuxt"') or self._file_exists(
+            "nuxt.config.ts"
+        ):
             frameworks.append("Nuxt")
         if self._file_contains_pattern(["package.json"], '"hono"'):
             frameworks.append("Hono")
@@ -198,25 +206,39 @@ class ContextAnalyzer:
             frameworks.append("Fastify")
         if self._file_contains_pattern(["package.json"], '"koa"'):
             frameworks.append("Koa")
-        if self._file_contains_pattern(["package.json"], '"nestjs"') or self._file_contains_pattern(["package.json"], '"@nestjs/core"'):
+        if self._file_contains_pattern(["package.json"], '"nestjs"') or self._file_contains_pattern(
+            ["package.json"], '"@nestjs/core"'
+        ):
             frameworks.append("NestJS")
-        if self._file_contains_pattern(["package.json"], '"prisma"') or self._file_exists("prisma/schema.prisma"):
+        if self._file_contains_pattern(["package.json"], '"prisma"') or self._file_exists(
+            "prisma/schema.prisma"
+        ):
             frameworks.append("Prisma")
         if self._file_contains_pattern(["package.json"], '"drizzle-orm"'):
             frameworks.append("Drizzle")
         if self._file_contains_pattern(["package.json"], '"typeorm"'):
             frameworks.append("TypeORM")
-        if self._file_contains_pattern(["package.json"], '"trpc"') or self._file_contains_pattern(["package.json"], '"@trpc/server"'):
+        if self._file_contains_pattern(["package.json"], '"trpc"') or self._file_contains_pattern(
+            ["package.json"], '"@trpc/server"'
+        ):
             frameworks.append("tRPC")
         if self._file_contains_pattern(["package.json"], '"zod"'):
             frameworks.append("Zod")
 
         # Build tools / Meta-frameworks
-        if self._file_contains_pattern(["package.json"], '"turbo"') or self._file_exists("turbo.json"):
+        if self._file_contains_pattern(["package.json"], '"turbo"') or self._file_exists(
+            "turbo.json"
+        ):
             frameworks.append("Turborepo")
-        if self._file_contains_pattern(["package.json"], '"vite"') or self._file_exists("vite.config.ts") or self._file_exists("vite.config.js"):
+        if (
+            self._file_contains_pattern(["package.json"], '"vite"')
+            or self._file_exists("vite.config.ts")
+            or self._file_exists("vite.config.js")
+        ):
             frameworks.append("Vite")
-        if self._file_contains_pattern(["package.json"], '"vitest"') or self._file_exists("vitest.config.ts"):
+        if self._file_contains_pattern(["package.json"], '"vitest"') or self._file_exists(
+            "vitest.config.ts"
+        ):
             frameworks.append("Vitest")
 
         # Ruby
@@ -342,7 +364,14 @@ class ContextAnalyzer:
         has_routes = any(self._directory_exists(d) for d in route_dirs)
 
         # Check for src directory with entrypoints (common pattern)
-        src_entries = ["src/index.ts", "src/index.js", "src/main.ts", "src/main.js", "src/app.ts", "src/app.js"]
+        src_entries = [
+            "src/index.ts",
+            "src/index.js",
+            "src/main.ts",
+            "src/main.js",
+            "src/app.ts",
+            "src/app.js",
+        ]
         for entry in src_entries:
             if self._file_exists(entry):
                 entrypoints.append(entry)
@@ -368,7 +397,13 @@ class ContextAnalyzer:
             "has_route_structure": has_routes,
             "has_monorepo_structure": has_packages,
             "has_package_entrypoint": has_pkg_entrypoint,
-            "strength": min(1.0, (len(entrypoints) * 0.2) + (0.3 if has_routes else 0) + (0.3 if has_packages else 0) + (0.2 if has_pkg_entrypoint else 0)),
+            "strength": min(
+                1.0,
+                (len(entrypoints) * 0.2)
+                + (0.3 if has_routes else 0)
+                + (0.3 if has_packages else 0)
+                + (0.2 if has_pkg_entrypoint else 0),
+            ),
         }
 
     def _detect_config_files(self) -> Dict[str, any]:
@@ -438,11 +473,21 @@ class ContextAnalyzer:
             controls.append("security_policy")
 
         # CI/CD pipelines
-        if self._directory_exists(".github/workflows") or self._directory_exists(".gitlab-ci.yml") or self._file_exists(".travis.yml") or self._file_exists("Jenkinsfile") or self._file_exists(".circleci/config.yml"):
+        if (
+            self._directory_exists(".github/workflows")
+            or self._directory_exists(".gitlab-ci.yml")
+            or self._file_exists(".travis.yml")
+            or self._file_exists("Jenkinsfile")
+            or self._file_exists(".circleci/config.yml")
+        ):
             controls.append("ci_cd_pipeline")
 
         # Code ownership
-        if self._file_exists("CODEOWNERS") or self._file_exists(".github/CODEOWNERS") or self._file_exists("docs/CODEOWNERS"):
+        if (
+            self._file_exists("CODEOWNERS")
+            or self._file_exists(".github/CODEOWNERS")
+            or self._file_exists("docs/CODEOWNERS")
+        ):
             controls.append("code_ownership")
 
         # Pre-commit hooks
@@ -454,7 +499,9 @@ class ContextAnalyzer:
             controls.append("contributing_guidelines")
 
         # Code of conduct
-        if self._file_exists("CODE_OF_CONDUCT.md") or self._file_exists(".github/CODE_OF_CONDUCT.md"):
+        if self._file_exists("CODE_OF_CONDUCT.md") or self._file_exists(
+            ".github/CODE_OF_CONDUCT.md"
+        ):
             controls.append("code_of_conduct")
 
         # Check for security scanning configs
