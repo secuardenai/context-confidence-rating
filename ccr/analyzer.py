@@ -2,7 +2,7 @@
 Context Confidence Rating (CCR™) Analyzer
 A lightweight library for calculating context-aware security confidence scores.
 
-Copyright (c) 2025 Secuarden by Appsec360
+Copyright (c) 2025 Secuarden 
 Licensed under MIT License
 """
 
@@ -176,44 +176,118 @@ class ContextAnalyzer:
             frameworks.append("Flask")
         if self._file_contains_pattern(["requirements.txt", "pyproject.toml"], "fastapi"):
             frameworks.append("FastAPI")
+        if self._file_contains_pattern(["requirements.txt", "pyproject.toml"], "sqlalchemy"):
+            frameworks.append("SQLAlchemy")
 
-        # Node.js frameworks
+        # Node.js/JavaScript frameworks
         if self._file_contains_pattern(["package.json"], '"express"'):
             frameworks.append("Express")
-        if self._file_contains_pattern(["package.json"], '"next"'):
+        if self._file_contains_pattern(["package.json"], '"next"') or self._file_exists("next.config.js") or self._file_exists("next.config.mjs"):
             frameworks.append("Next.js")
+        if self._file_contains_pattern(["package.json"], '"react"'):
+            frameworks.append("React")
+        if self._file_contains_pattern(["package.json"], '"vue"'):
+            frameworks.append("Vue")
+        if self._file_contains_pattern(["package.json"], '"svelte"') or self._file_exists("svelte.config.js"):
+            frameworks.append("Svelte")
+        if self._file_contains_pattern(["package.json"], '"nuxt"') or self._file_exists("nuxt.config.ts"):
+            frameworks.append("Nuxt")
+        if self._file_contains_pattern(["package.json"], '"hono"'):
+            frameworks.append("Hono")
+        if self._file_contains_pattern(["package.json"], '"fastify"'):
+            frameworks.append("Fastify")
+        if self._file_contains_pattern(["package.json"], '"koa"'):
+            frameworks.append("Koa")
+        if self._file_contains_pattern(["package.json"], '"nestjs"') or self._file_contains_pattern(["package.json"], '"@nestjs/core"'):
+            frameworks.append("NestJS")
+        if self._file_contains_pattern(["package.json"], '"prisma"') or self._file_exists("prisma/schema.prisma"):
+            frameworks.append("Prisma")
+        if self._file_contains_pattern(["package.json"], '"drizzle-orm"'):
+            frameworks.append("Drizzle")
+        if self._file_contains_pattern(["package.json"], '"typeorm"'):
+            frameworks.append("TypeORM")
+        if self._file_contains_pattern(["package.json"], '"trpc"') or self._file_contains_pattern(["package.json"], '"@trpc/server"'):
+            frameworks.append("tRPC")
+        if self._file_contains_pattern(["package.json"], '"zod"'):
+            frameworks.append("Zod")
 
-        # Other indicators
+        # Build tools / Meta-frameworks
+        if self._file_contains_pattern(["package.json"], '"turbo"') or self._file_exists("turbo.json"):
+            frameworks.append("Turborepo")
+        if self._file_contains_pattern(["package.json"], '"vite"') or self._file_exists("vite.config.ts") or self._file_exists("vite.config.js"):
+            frameworks.append("Vite")
+        if self._file_contains_pattern(["package.json"], '"vitest"') or self._file_exists("vitest.config.ts"):
+            frameworks.append("Vitest")
+
+        # Ruby
         if self._file_exists("Gemfile"):
-            frameworks.append("Ruby/Rails")
+            if self._file_contains_pattern(["Gemfile"], "rails"):
+                frameworks.append("Rails")
+            else:
+                frameworks.append("Ruby")
+
+        # Go
+        if self._file_contains_pattern(["go.mod"], "gin-gonic"):
+            frameworks.append("Gin")
+        if self._file_contains_pattern(["go.mod"], "echo"):
+            frameworks.append("Echo")
+        if self._file_contains_pattern(["go.mod"], "fiber"):
+            frameworks.append("Fiber")
+
+        # Rust
+        if self._file_contains_pattern(["Cargo.toml"], "actix"):
+            frameworks.append("Actix")
+        if self._file_contains_pattern(["Cargo.toml"], "axum"):
+            frameworks.append("Axum")
+        if self._file_contains_pattern(["Cargo.toml"], "rocket"):
+            frameworks.append("Rocket")
 
         return {
             "detected": len(frameworks) > 0,
             "frameworks": frameworks,
-            "strength": min(1.0, len(frameworks) * 0.3),
+            "strength": min(1.0, len(frameworks) * 0.15 + 0.1) if frameworks else 0,
         }
 
     def _detect_dependencies(self) -> Dict[str, any]:
         """Detect dependency management files"""
         dep_files = [
+            # Python
             "requirements.txt",
             "Pipfile",
+            "Pipfile.lock",
             "pyproject.toml",
             "poetry.lock",
+            "uv.lock",
+            # JavaScript/Node
             "package.json",
             "package-lock.json",
             "yarn.lock",
+            "pnpm-lock.yaml",
+            "bun.lockb",
+            # Ruby
             "Gemfile",
             "Gemfile.lock",
+            # Java
             "pom.xml",
             "build.gradle",
+            "build.gradle.kts",
+            # Go
             "go.mod",
             "go.sum",
+            # Rust
+            "Cargo.toml",
+            "Cargo.lock",
+            # .NET
+            "packages.config",
+            "*.csproj",
+            # PHP
+            "composer.json",
+            "composer.lock",
         ]
 
         found = [f for f in dep_files if self._file_exists(f)]
 
-        return {"detected": len(found) > 0, "files": found, "strength": min(1.0, len(found) * 0.25)}
+        return {"detected": len(found) > 0, "files": found, "strength": min(1.0, len(found) * 0.2)}
 
     def _analyze_dataflow_potential(self) -> Dict[str, any]:
         """Analyze if dataflow analysis is feasible"""
@@ -232,35 +306,69 @@ class ContextAnalyzer:
         """Find application entrypoints"""
         entrypoints = []
 
-        # Common entrypoint files
+        # Common entrypoint files at root level
         entry_files = [
+            # Python
             "main.py",
             "app.py",
             "server.py",
             "__main__.py",
+            "wsgi.py",
+            "asgi.py",
+            # JavaScript/TypeScript
             "index.js",
+            "index.ts",
+            "index.mjs",
+            "index.mts",
             "server.js",
+            "server.ts",
             "app.js",
+            "app.ts",
+            "main.js",
+            "main.ts",
+            # Go
             "main.go",
+            # Rust
             "main.rs",
+            "lib.rs",
         ]
 
         for entry in entry_files:
             if self._file_exists(entry):
                 entrypoints.append(entry)
 
-        # Check for routes/handlers
-        has_routes = (
-            self._directory_exists("routes")
-            or self._directory_exists("api")
-            or self._directory_exists("handlers")
-        )
+        # Check for routes/handlers directories
+        route_dirs = ["routes", "api", "handlers", "controllers", "endpoints", "pages", "app"]
+        has_routes = any(self._directory_exists(d) for d in route_dirs)
+
+        # Check for src directory with entrypoints (common pattern)
+        src_entries = ["src/index.ts", "src/index.js", "src/main.ts", "src/main.js", "src/app.ts", "src/app.js"]
+        for entry in src_entries:
+            if self._file_exists(entry):
+                entrypoints.append(entry)
+
+        # Check for monorepo packages with their own entrypoints
+        has_packages = self._directory_exists("packages") or self._directory_exists("apps")
+
+        # Check package.json for main/exports fields
+        has_pkg_entrypoint = False
+        pkg_path = self.repo_path / "package.json"
+        if pkg_path.exists():
+            try:
+                with open(pkg_path, "r", encoding="utf-8") as f:
+                    pkg = __import__("json").load(f)
+                    if pkg.get("main") or pkg.get("exports") or pkg.get("module"):
+                        has_pkg_entrypoint = True
+            except:
+                pass
 
         return {
-            "detected": len(entrypoints) > 0 or has_routes,
+            "detected": len(entrypoints) > 0 or has_routes or has_packages or has_pkg_entrypoint,
             "files": entrypoints,
             "has_route_structure": has_routes,
-            "strength": min(1.0, (len(entrypoints) * 0.3) + (0.4 if has_routes else 0)),
+            "has_monorepo_structure": has_packages,
+            "has_package_entrypoint": has_pkg_entrypoint,
+            "strength": min(1.0, (len(entrypoints) * 0.2) + (0.3 if has_routes else 0) + (0.3 if has_packages else 0) + (0.2 if has_pkg_entrypoint else 0)),
         }
 
     def _detect_config_files(self) -> Dict[str, any]:
@@ -268,17 +376,47 @@ class ContextAnalyzer:
         config_files = []
 
         patterns = [
+            # Python
             "config.py",
             "settings.py",
+            "pytest.ini",
+            "setup.cfg",
+            "tox.ini",
+            "pyproject.toml",
+            # JavaScript/TypeScript
+            "tsconfig.json",
+            "jsconfig.json",
+            "vite.config.ts",
+            "vite.config.js",
+            "vitest.config.ts",
+            "vitest.config.js",
+            "jest.config.js",
+            "jest.config.ts",
+            "webpack.config.js",
+            "rollup.config.js",
+            "esbuild.config.js",
+            "turbo.json",
+            "biome.json",
+            ".eslintrc",
+            ".eslintrc.js",
+            ".eslintrc.json",
+            ".prettierrc",
+            ".prettierrc.js",
+            ".prettierrc.json",
+            "next.config.js",
+            "next.config.mjs",
+            "nuxt.config.ts",
+            "svelte.config.js",
+            # General
             "config.json",
             "config.yaml",
             "config.yml",
             ".env.example",
+            ".env.template",
             "docker-compose.yml",
+            "docker-compose.yaml",
             "Dockerfile",
-            "pytest.ini",
-            "setup.cfg",
-            "tox.ini",
+            "Makefile",
         ]
 
         for pattern in patterns:
@@ -288,29 +426,51 @@ class ContextAnalyzer:
         return {
             "detected": len(config_files) > 0,
             "files": config_files,
-            "strength": min(1.0, len(config_files) * 0.2),
+            "strength": min(1.0, len(config_files) * 0.15),
         }
 
     def _detect_security_controls(self) -> Dict[str, any]:
         """Detect security-related files and configurations"""
         controls = []
 
-        if self._file_exists("SECURITY.md"):
+        # Security policy
+        if self._file_exists("SECURITY.md") or self._file_exists(".github/SECURITY.md"):
             controls.append("security_policy")
-        if self._file_exists(".github/workflows"):
+
+        # CI/CD pipelines
+        if self._directory_exists(".github/workflows") or self._directory_exists(".gitlab-ci.yml") or self._file_exists(".travis.yml") or self._file_exists("Jenkinsfile") or self._file_exists(".circleci/config.yml"):
             controls.append("ci_cd_pipeline")
-        if self._file_exists("CODEOWNERS"):
+
+        # Code ownership
+        if self._file_exists("CODEOWNERS") or self._file_exists(".github/CODEOWNERS") or self._file_exists("docs/CODEOWNERS"):
             controls.append("code_ownership")
-        if self._file_exists(".pre-commit-config.yaml"):
+
+        # Pre-commit hooks
+        if self._file_exists(".pre-commit-config.yaml") or self._file_exists(".husky"):
             controls.append("pre_commit_hooks")
+
+        # Contributing guidelines
+        if self._file_exists("CONTRIBUTING.md") or self._file_exists(".github/CONTRIBUTING.md"):
+            controls.append("contributing_guidelines")
+
+        # Code of conduct
+        if self._file_exists("CODE_OF_CONDUCT.md") or self._file_exists(".github/CODE_OF_CONDUCT.md"):
+            controls.append("code_of_conduct")
 
         # Check for security scanning configs
         security_configs = [
             ".semgrep.yml",
+            ".semgrep.yaml",
+            "semgrep.yml",
             ".bandit",
             "bandit.yaml",
             ".snyk",
             "sonar-project.properties",
+            ".gitleaks.toml",
+            "trivy.yaml",
+            ".trivyignore",
+            "codecov.yml",
+            ".codecov.yml",
         ]
 
         for config in security_configs:
@@ -320,7 +480,7 @@ class ContextAnalyzer:
         return {
             "detected": len(controls) > 0,
             "controls": controls,
-            "strength": min(1.0, len(controls) * 0.25),
+            "strength": min(1.0, len(controls) * 0.2),
         }
 
     def _detect_test_files(self) -> Dict[str, any]:
@@ -405,6 +565,7 @@ class ContextAnalyzer:
 
     def _has_import_statements(self) -> bool:
         """Check if code has import statements"""
+        # Check Python files
         for py_file in self.repo_path.rglob("*.py"):
             try:
                 with open(py_file, "r", encoding="utf-8") as f:
@@ -413,22 +574,44 @@ class ContextAnalyzer:
                         return True
             except:
                 pass
+        # Check JS/TS files
+        for ext in ["*.js", "*.ts", "*.jsx", "*.tsx", "*.mjs", "*.mts"]:
+            for js_file in self.repo_path.rglob(ext):
+                try:
+                    with open(js_file, "r", encoding="utf-8") as f:
+                        content = f.read(1000)
+                        if "import " in content or "require(" in content:
+                            return True
+                except:
+                    pass
         return False
 
     def _has_function_definitions(self) -> bool:
         """Check if code has function definitions"""
+        # Check Python files
         for py_file in self.repo_path.rglob("*.py"):
             try:
                 with open(py_file, "r", encoding="utf-8") as f:
                     content = f.read(2000)
-                    if "def " in content or "function " in content:
+                    if "def " in content:
                         return True
             except:
                 pass
+        # Check JS/TS files
+        for ext in ["*.js", "*.ts", "*.jsx", "*.tsx", "*.mjs", "*.mts"]:
+            for js_file in self.repo_path.rglob(ext):
+                try:
+                    with open(js_file, "r", encoding="utf-8") as f:
+                        content = f.read(2000)
+                        if "function " in content or "=> " in content or "async " in content:
+                            return True
+                except:
+                    pass
         return False
 
     def _has_class_definitions(self) -> bool:
         """Check if code has class definitions"""
+        # Check Python files
         for py_file in self.repo_path.rglob("*.py"):
             try:
                 with open(py_file, "r", encoding="utf-8") as f:
@@ -437,11 +620,37 @@ class ContextAnalyzer:
                         return True
             except:
                 pass
+        # Check JS/TS files
+        for ext in ["*.js", "*.ts", "*.jsx", "*.tsx", "*.mjs", "*.mts"]:
+            for js_file in self.repo_path.rglob(ext):
+                try:
+                    with open(js_file, "r", encoding="utf-8") as f:
+                        content = f.read(2000)
+                        if "class " in content or "interface " in content or "type " in content:
+                            return True
+                except:
+                    pass
         return False
 
     def _has_test_files(self) -> bool:
         """Check for test files"""
-        test_patterns = ["test_*.py", "*_test.py", "*.test.js", "*.spec.js"]
+        test_patterns = [
+            # Python
+            "test_*.py",
+            "*_test.py",
+            # JavaScript
+            "*.test.js",
+            "*.spec.js",
+            "*.test.mjs",
+            "*.spec.mjs",
+            # TypeScript
+            "*.test.ts",
+            "*.spec.ts",
+            "*.test.tsx",
+            "*.spec.tsx",
+            "*.test.mts",
+            "*.spec.mts",
+        ]
 
         for pattern in test_patterns:
             if list(self.repo_path.rglob(pattern)):
